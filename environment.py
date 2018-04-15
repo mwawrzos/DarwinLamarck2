@@ -51,7 +51,7 @@ class Model(mesa.model.Model):
 
     def add_population(self, population):
         for agent in population:
-            self.space.place_agent(agent, agent.pos)
+            self.space.place_agent(agent, np.random.rand(2))
             self.schedule.add(agent)
 
     def step(self):

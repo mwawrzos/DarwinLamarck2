@@ -27,7 +27,6 @@ class Agent:
 
     def __init__(self, space : mesa.space.ContinuousSpace):
         self.space = space
-        self.pos = random.random(), random.random()
         self.energy = self.MAX_ENERGY
         
     def step(self):
