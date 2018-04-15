@@ -12,13 +12,50 @@ def score_agent_hunger(agent):
 def filter_by_type(population, agentType):
     return (agent for agent in population if type(agent) is agentType)
 
-def distance_to_closest(agent, poulation):
-    return min((agent.space.get_distance(agent.pos, s.pos) for s in poulation),
-               default=agent.VIEW_RANGE)
+def closes_neighbour(agent, population):
+    def distance_from_agent(neighbour):
+        return agent.space.get_distance(agent.pos, neighbour.pos)
+    return min((neighbour for neighbour in population),
+               key=distance_from_agent,
+               default=agent)  
 
 def avoidance_score(agent, neighbours):
-    closest = distance_to_closest(agent, neighbours)
-    return 1 - (closest / agent.VIEW_RANGE)
+    closest = closes_neighbour(agent, neighbours)
+    distance_to_closest = agent.space.get_distance(agent.pos, closest.pos)
+    return 1 - (distance_to_closest / agent.VIEW_RANGE)
+
+def avoid(neighbour_heading, radius):
+    length = np.linalg.norm(neighbour_heading)
+    return neighbour_heading * (radius - length) / length
+
+def escape(agent, neighbours):
+    return sum((avoid(agent.space.get_heading(agent.pos, neighbour.pos),
+                      agent.VIEW_RANGE)
+                for neighbour in neighbours))
+
+def cohere(agent, neighbours):
+    v = sum((agent.space.get_heading(agent.pos, neighbour.pos)
+             for neighbour in neighbours))
+    return v / np.linalg.norm(v)
+
+def align(agent, neighbours):
+    total, count = 0, 0
+    for neighbour in neighbours:
+        count += 1
+        total += agent.space.get_heading(agent.pos, neighbour.pos)
+    return total / count
+
+def couple(agent, population):
+    c, s, a = zip(*((a,a,a) for a in population))
+    cohersion  = cohere(agent, c)
+    alignment  = align(agent, a)
+    separation = escape(agent, (neighbour
+                                for neighbour in s
+                                if agent.space.get_distance(agent.pos, neighbour.pos) <= agent.VIEW_RANGE / 2))
+    return cohersion + separation + alignment                    
+
+class Grass:
+    pass
 
 class Agent:
     VIEW_RANGE = 0.1
@@ -69,13 +106,16 @@ class SheepAgent(Agent):
          self.coupling_a, self.coupling_b                 ) = genes
 
     def hunger(self, neighbours):
-        pass
+        food = filter_by_type(neighbours, Grass)
+        closest = closes_neighbour(self, food)
+        return self.space.get_heading(self.pos, closest.pos)
 
     def coupling(self, neighbours):
-        pass
+        sheep = filter_by_type(neighbours, SheepAgent)
+        couple(self, sheep)
 
     def fear(self, neighbours):
-        pass
+        return escape(self, neighbours)
 
     def score_hunger(self):
         return score_agent_hunger(self)
@@ -102,10 +142,13 @@ class WolfAgent(Agent):
          self.coupling_a, self.coupling_b                   ) = genes
 
     def hunger(self, neighbours):
-        pass
+        food = filter_by_type(neighbours, SheepAgent)
+        closest = closes_neighbour(self, food)
+        return self.space.get_heading(self.pos, closest.pos)
 
     def coupling(self, neighbours):
-        pass
+        wolves = filter_by_type(neighbours, WolfAgent)
+        couple(self, wolves)
 
     def score_hunger(self):
         return score_agent_hunger(self)
