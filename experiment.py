@@ -37,4 +37,5 @@ class Experiment:
 
     def random_seed(self):
         import datetime
-        return datetime.datetime.now()
+        now = datetime.datetime.now()
+        return now.microsecond
