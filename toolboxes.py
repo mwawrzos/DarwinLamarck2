@@ -24,9 +24,6 @@ def common_toolbox():
     toolbox.register('new_population', algorithms.varAnd, cxpb=0.5, mutpb=0.1, toolbox=toolbox)
     return toolbox
 
-def identity_tuple(x):
-    return x,
-
 def sheep(count):
     toolbox = common_toolbox()
     toolbox.register('individual', tools.initRepeat, creator.Sheep, toolbox.random, n=7)
@@ -43,16 +40,14 @@ def wolves(count):
     return toolbox
 
 def lamarckian(toolbox):
-    toolbox.__name__ = 'lama'
-    toolbox.register('change_positive', tools.mutGaussian, mu= 1e-4, std=5e-5)
+    toolbox.register('change_positive', tools.mutGaussian, mu= 1e-4, sigma=5e-5, indpb=0.1)
     toolbox.decorate('change_positive', bounded())
-    toolbox.register('change_negative', tools.mutGaussian, mu=-1e-4, std=5e-5)
+    toolbox.register('change_negative', tools.mutGaussian, mu=-1e-4, sigma=5e-5, indpb=0.1)
     toolbox.decorate('change_negative', bounded())
-    toolbox.register('mutate', identity_tuple)
+    toolbox.register('mutate', tools.emo.identity)
     return toolbox
 
 def darwinian(toolbox):
-    toolbox.__name__ = 'dar'
     toolbox.register('change_positive', tools.emo.identity)
     toolbox.register('change_negative', tools.emo.identity)
     toolbox.register('mutate', tools.mutGaussian, mu=0, sigma=1e-2, indpb=1e-1)
