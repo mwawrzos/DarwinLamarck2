@@ -85,20 +85,22 @@ class Agent:
         self.decision = self.make_deicision(neighbours)
     
     def advance(self):
-        if self.valid_decision():
+        coliding = self.space.get_neighbors(self.decision.pos, self.RADIUS, include_center=False)
+
+        if self.valid_decision(coliding):
             self.move()
         self.energy -= self.decision.cost
         if self.energy < self.MAX_ENERGY:
-            self.find_food()
-        self.penalty()
-        if self.energy < 0:
+            self.find_food(coliding)
+        self.penalty(coliding)
+        if self.energy <= 0:
             self.space._remove_agent(self.pos, self)
 
     def move(self):
         self.space.move_agent(self, self.decision.pos)
     
-    def valid_decision(self):
-        return not self.space.get_neighbors(self.decision.pos, self.RADIUS)
+    def valid_decision(self, coliding):
+        return not filter_by_type(coliding, type(self))
 
     def make_deicision(self, neighbours):
         decisions, weights = self.get_weighted_decisions(neighbours)
@@ -106,10 +108,10 @@ class Agent:
         decision.pos = self.space.torus_adj(decision.pos)
         return decision
     
-    def find_food(self):
+    def find_food(self, coliding):
         pass
 
-    def penalty(self):
+    def penalty(self, coliding):
         pass
 
     def get_weighted_decisions(self, neighbours):
@@ -121,6 +123,7 @@ class SheepAgent(Agent):
     def __init__(self, genes, space):
         super(SheepAgent, self).__init__(space)
         self.apply_genes(genes)
+        self.eaten = 0
 
     def apply_genes(self, genes):
         (  self.hunger_a,   self.hunger_b,
@@ -159,12 +162,18 @@ class SheepAgent(Agent):
         return ([self.hunger,         self.coupling,           self.fear],
                 [self.score_hunger(), self.score_coupling(ns), self.score_fear(ns)])
 
+    def find_food(self, coliding):
+        if filter_by_type(coliding, Grass):
+            self.energy += 10
+            self.eaten  += 1
+
 class WolfAgent(Agent):
     RADIUS = 1.4e-2
 
     def __init__(self, genes, space):
         super(WolfAgent, self).__init__(space)
         self.apply_genes(genes)
+        self.eaten = 0
 
     def apply_genes(self, genes):
         (  self.hunger_a,   self.hunger_b, self.hunger_speed,
@@ -193,3 +202,9 @@ class WolfAgent(Agent):
     def get_weighted_decisions(self, ns):
         return ([self.hunger,         self.coupling],
                 [self.score_hunger(), self.score_coupling(ns)])
+
+    def find_food(self, coliding):
+        for sheep in filter_by_type(coliding, SheepAgent):
+            self.energy, sheep.energy = self.energy + 400, 0
+            self.eaten  += 1
+            self.space._remove_agent(sheep.pos, sheep)

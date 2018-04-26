@@ -24,9 +24,18 @@ def create_populaiton(sheep, wolves, space):
                            create_grass(count=200))
 
 
-def extract_genes(population):
-    return ([sheep.extract_genes() for sheep in population if type(sheep) == SheepAgent],
-            [wolf.extract_genes()  for wolf  in population if type(wolf)  == WolfAgent])
+def update_species(species, population):
+    sheep, wolves = species
+
+    for i, s_agent in enumerate(population[:len(sheep)]):
+        sheep[i][:] = s_agent.extract_genes()
+        sheep[i].fitness = s_agent.eaten, s_agent.energy
+
+    for i, w_agent in enumerate(population[len(sheep):len(wolves)]):
+        wolves[i][:] = w_agent.extract_genes()
+        wolves[i].fitness = w_agent.eaten, w_agent.energy
+
+    return sheep, wolves
 
 class Environment:
     def __init__(self, max_iter=500):
@@ -36,7 +45,7 @@ class Environment:
         model = self.prepare_model(species, seed)
         model.run_model()
         population = model.get_results()
-        return extract_genes(population)
+        return update_species(species, population)
 
     def prepare_model(self, species, seed):
         model = Model(seed, self.max_iter)
