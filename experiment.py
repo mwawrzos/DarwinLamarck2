@@ -1,9 +1,9 @@
 from environment import Environment
 
 class Experiment:
-    def __init__(self, toolbox, max_iter=500, checkpoint=None):
-        self.toolbox = toolbox
-        self.max_iter = max_iter
+    def __init__(self, toolbox, epochs=500, checkpoint=None):
+        self.environment = Environment()
+        self.epochs = epochs
 
         if checkpoint:
             self.load_state(checkpoint)
@@ -12,7 +12,6 @@ class Experiment:
 
     def init_state(self):
         self.iteration = 0
-        self.environment = Environment(self.max_iter)
         
         population, = self.toolbox.population()
         self.population, = self.environment.run_simulation(population, self.random_seed())
@@ -29,7 +28,7 @@ class Experiment:
             self.update_results(population)
 
     def finished(self):
-        return self.iteration >= self.max_iter
+        return self.iteration >= self.epochs
             
     def update_results(self, population):
         self.iteration += 1

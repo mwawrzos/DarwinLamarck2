@@ -38,8 +38,8 @@ def update_species(species, population):
     return sheep, wolves
 
 class Environment:
-    def __init__(self, max_iter=500):
-        self.max_iter = max_iter
+    def __init__(self, steps=500):
+        self.steps = steps
 
     def run_simulation(self, species, seed):
         model = self.prepare_model(species, seed)
@@ -48,16 +48,16 @@ class Environment:
         return update_species(species, population),
 
     def prepare_model(self, species, seed):
-        model = Model(seed, self.max_iter)
+        model = Model(seed, self.steps)
         population = create_populaiton(*species, model.space)
         model.add_population(population)
         return model
 
 class Model(mesa.model.Model):
-    def __init__(self, seed, max_iter):
+    def __init__(self, seed, steps):
         super(Model, self).__init__(seed)
         self.iter = 0
-        self.max_iter = max_iter
+        self.steps = steps
 
         self.schedule = mesa.time.SimultaneousActivation(self)
         self.space = mesa.space.ContinuousSpace(x_max=1, y_max=1, torus=True)
@@ -84,7 +84,7 @@ class Model(mesa.model.Model):
         self.iter += 1
         sys.stdout.write("\r%d" % self.iter,)
         sys.stdout.flush()
-        self.running = self.iter <= self.max_iter
+        self.running = self.iter <= self.steps
 
     def get_results(self):
         return self.population
