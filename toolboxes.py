@@ -60,20 +60,15 @@ def darwinian(toolbox):
     toolbox.decorate('mutate', bounded())
     return toolbox
 
-def call(method):
-    def caller(toolbox, *args, **kwargs):
-        return toolbox.__getattribute__(method)(*args, **kwargs)
-    return caller
-
-def run_member(foo, pop, *args):
-    return [foo(*x) for x in zip(pop, *args)]
+def distribute_call(member_foo, pop, *pop_arg):
+    return [getattr(toolbox, member_foo)(*arg) for toolbox, *arg in zip(pop, *pop_arg)],
 
 def environment(*species):
     toolbox = base.Toolbox()
-    toolbox.register('population',     run_member, call('population'),     species)
-    toolbox.register('select',         run_member, call('select'),         species)
-    toolbox.register('mate',           run_member, call('mate'),           species)
-    toolbox.register('mutate',         run_member, call('mutate'),         species)
-    toolbox.register('new_population', run_member, call('new_population'), species)
+    toolbox.register('population',     distribute_call, 'population',     species)
+    toolbox.register('select',         distribute_call, 'select',         species)
+    toolbox.register('mate',           distribute_call, 'mate',           species)
+    toolbox.register('mutate',         distribute_call, 'mutate',         species)
+    toolbox.register('new_population', distribute_call, 'new_population', species)
     
     return toolbox
