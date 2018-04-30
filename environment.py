@@ -29,11 +29,11 @@ def update_species(species, population):
 
     for i, s_agent in enumerate(population[:len(sheep)]):
         sheep[i][:] = s_agent.extract_genes()
-        sheep[i].fitness = s_agent.eaten, s_agent.energy
+        sheep[i].fitness.values = s_agent.eaten, s_agent.energy
 
     for i, w_agent in enumerate(population[len(sheep):len(wolves)]):
         wolves[i][:] = w_agent.extract_genes()
-        wolves[i].fitness = w_agent.eaten, w_agent.energy
+        wolves[i].fitness.values = w_agent.eaten, w_agent.energy
 
     return sheep, wolves
 
@@ -45,7 +45,7 @@ class Environment:
         model = self.prepare_model(species, seed)
         model.run_model()
         population = model.get_results()
-        return update_species(species, population)
+        return update_species(species, population),
 
     def prepare_model(self, species, seed):
         model = Model(seed, self.max_iter)

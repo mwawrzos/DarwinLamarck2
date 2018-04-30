@@ -71,7 +71,7 @@ class TestLamarckian(TestCase):
 
     def test_mutate(self):
         self.assertEqual(self.lamarckian.mutate(self.individual),
-                         self.individual)
+                         (self.individual,))
 
 class TestDarwinian(TestCase):
     def setUp(self):
@@ -105,20 +105,20 @@ class TestEnvironment(TestCase):
         
     def test_delegates_population_call(self):
         self.assertEqual(self.environment.population(),
-                         ['a_population', 'b_population'])
+                         (['a_population', 'b_population'],))
         
     def test_delegates_select_call(self):
         self.assertEqual(self.environment.select(),
-                         ['a_select', 'b_select'])
+                         (['a_select', 'b_select'],))
         
     def test_delegates_mate_call(self):
         self.assertEqual(self.environment.mate(),
-                         ['a_mate', 'b_mate'])
+                         (['a_mate', 'b_mate'],))
         
     def test_delegates_mutate_call(self):
         self.assertEqual(self.environment.mutate(),
-                         ['a_mutate', 'b_mutate'])
+                         (['a_mutate', 'b_mutate'],))
         
     def test_delegates_new_population_call(self):
         self.assertEqual(self.environment.new_population(),
-                         ['a_new_population', 'b_new_population'])
+                         (['a_new_population', 'b_new_population'],))

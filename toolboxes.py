@@ -17,6 +17,11 @@ def bounded(low=0, high=1):
         return wrapper
     return bounder
 
+def enclosed_in_tuple(func):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs),
+    return wrapper
+
 def common_toolbox():
     toolbox = base.Toolbox()
     toolbox.register('random', random.random)
@@ -45,6 +50,7 @@ def lamarckian(toolbox):
     toolbox.register('change_negative', tools.mutGaussian, mu=-1e-4, sigma=5e-5, indpb=0.1)
     toolbox.decorate('change_negative', bounded())
     toolbox.register('mutate', tools.emo.identity)
+    toolbox.decorate('mutate', enclosed_in_tuple)
     return toolbox
 
 def darwinian(toolbox):

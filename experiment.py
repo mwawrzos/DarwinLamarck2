@@ -12,19 +12,19 @@ class Experiment:
 
     def init_state(self):
         self.iteration = 0
-        self.environment = Environment()
+        self.environment = Environment(self.max_iter)
         
-        population = self.toolbox.population()
-        self.population = self.environment.run_simulation(population, self.random_seed())
+        population, = self.toolbox.population()
+        self.population, = self.environment.run_simulation(population, self.random_seed())
 
     def load_state(self, checkpoint):
         pass
 
     def run(self):
         while not self.finished():
-            population = self.toolbox.select(self.population)
-            population = self.toolbox.new_population(population)
-            population = self.environment.run_simulation(population, self.random_seed())
+            population, = self.toolbox.select(self.population)
+            population, = self.toolbox.new_population(population)
+            population, = self.environment.run_simulation(population, self.random_seed())
 
             self.update_results(population)
 

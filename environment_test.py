@@ -16,14 +16,14 @@ class TestEnvironment(TestCase):
         wolves = []
         species = sheep, wolves
         self.assertEqual(self.env.run_simulation(species, 42),
-                         species)
+                         (species,))
 
     def test_input(self):
         sheep = tbx.sheep(3).population()
         wolves = tbx.wolves(3).population()
         species = sheep, wolves
-        sheep, wolves = self.env.run_simulation(species, 42)
-        self.assertEqual((sheep, wolves),
-                         species)
+        (sheep, wolves), = self.env.run_simulation(species, 42)
+        self.assertEqual(((sheep, wolves),),
+                         (species,))
         self.assertEqual(contains_fitness(sheep), [True]*3)
         self.assertEqual(contains_fitness(wolves), [True]*3)
