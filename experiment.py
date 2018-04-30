@@ -3,12 +3,17 @@ from environment import Environment
 class Experiment:
     def __init__(self, toolbox, epochs=500, checkpoint=None):
         self.environment = Environment()
+        self.setup_toolbox(toolbox)
         self.epochs = epochs
 
         if checkpoint:
             self.load_state(checkpoint)
         else:
             self.init_state()
+
+    def setup_toolbox(self, toolbox):
+        self.toolbox = toolbox
+        self.toolbox.register('run_simulation', )
 
     def init_state(self):
         self.iteration = 0
