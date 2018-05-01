@@ -1,8 +1,9 @@
 from environment import Environment
+from gen_logging import Stats
 
 class Experiment:
-    def __init__(self, toolbox, epochs=500, checkpoint=None):
-        self.environment = Environment()
+    def __init__(self, toolbox, epochs=50, checkpoint=None):
+        self.environment = Environment(steps=10)
         self.setup_toolbox(toolbox)
         self.epochs = epochs
 
@@ -13,13 +14,15 @@ class Experiment:
 
     def setup_toolbox(self, toolbox):
         self.toolbox = toolbox
-        self.toolbox.register('run_simulation', )
+        self.stats = Stats()
+        self.toolbox.register('run_simulation', self.environment.run_simulation)
+        self.toolbox.decorate('run_simulation', self.stats.log_decorator)
 
     def init_state(self):
         self.iteration = 0
-        
+
         population, = self.toolbox.population()
-        self.population, = self.environment.run_simulation(population, self.random_seed())
+        self.population, = self.toolbox.run_simulation(population, self.random_seed())
 
     def load_state(self, checkpoint):
         pass
@@ -28,13 +31,13 @@ class Experiment:
         while not self.finished():
             population, = self.toolbox.select(self.population)
             population, = self.toolbox.new_population(population)
-            population, = self.environment.run_simulation(population, self.random_seed())
+            population, = self.toolbox.run_simulation(population, self.random_seed())
 
             self.update_results(population)
 
     def finished(self):
         return self.iteration >= self.epochs
-            
+
     def update_results(self, population):
         self.iteration += 1
         self.population = population

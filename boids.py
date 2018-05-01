@@ -1,5 +1,5 @@
 import numpy as np
-import mesa
+import mesa.space
 import random
 
 

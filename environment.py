@@ -31,7 +31,7 @@ def update_species(species, population):
         sheep[i][:] = s_agent.extract_genes()
         sheep[i].fitness.values = s_agent.eaten, s_agent.energy
 
-    for i, w_agent in enumerate(population[len(sheep):len(wolves)]):
+    for i, w_agent in enumerate(population[len(sheep):len(sheep)+len(wolves)]):
         wolves[i][:] = w_agent.extract_genes()
         wolves[i].fitness.values = w_agent.eaten, w_agent.energy
 
