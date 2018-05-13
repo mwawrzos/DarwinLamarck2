@@ -1,7 +1,7 @@
 import mesa
 import mesa.time
-import mesa.space
 import mesa.model
+import space
 import numpy as np
 import itertools
 import sys
@@ -60,7 +60,7 @@ class Model(mesa.model.Model):
         self.steps = steps
 
         self.schedule = mesa.time.SimultaneousActivation(self)
-        self.space = mesa.space.ContinuousSpace(x_max=1, y_max=1, torus=True)
+        self.space = space.CachedSpace()
 
     def add_population(self, population):
         self.population = list(population)

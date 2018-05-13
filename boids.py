@@ -12,16 +12,16 @@ def score_agent_hunger(agent):
 def filter_by_type(population, agentType):
     return (agent for agent in population if type(agent) is agentType)
 
-def closes_neighbour(agent, population):
-    def distance_from_agent(neighbour):
-        return agent.space.get_distance(agent.pos, neighbour.pos)
-    return min((neighbour for neighbour in population),
+def closest_neighbour(agent, population):
+    def distance_from_agent(neighbour_pos):
+        return agent.space.get_distance(agent.pos, neighbour_pos)
+    return min((neighbour.pos for neighbour in population),
                key=distance_from_agent,
-               default=agent)  
+               default=agent.pos+[agent.VIEW_RANGE,0])  
 
 def avoidance_score(agent, neighbours):
-    closest = closes_neighbour(agent, neighbours)
-    distance_to_closest = agent.space.get_distance(agent.pos, closest.pos)
+    closest = closest_neighbour(agent, neighbours)
+    distance_to_closest = agent.space.get_distance(agent.pos, closest)
     return 1 - (distance_to_closest / agent.VIEW_RANGE)
 
 def avoid(neighbour_heading, radius):
@@ -81,11 +81,11 @@ class Agent:
         self.pos = None
         
     def step(self):
-        neighbours = self.space.get_neighbors(self.pos, self.VIEW_RANGE, include_center=False)
+        neighbours = list(self.space.get_neighbors(self, self.VIEW_RANGE, include_center=False))
         self.decision = self.make_deicision(neighbours)
     
     def advance(self):
-        coliding = self.space.get_neighbors(self.decision.pos, self.RADIUS, include_center=False)
+        coliding = self._get_coliding()
 
         if self.valid_decision(coliding):
             self.move()
@@ -95,6 +95,13 @@ class Agent:
         self.penalty(coliding)
         if self.energy <= 0:
             self.space._remove_agent(self.pos, self)
+
+    def _get_coliding(self):
+        movement = self.space.get_distance(self.decision.pos, self.pos)
+        neighbours = self.space.get_neighbors(self, self.RADIUS + movement, include_center=False)
+        return [neighbour 
+                for neighbour in neighbours
+                if self.space.get_distance(self.decision.pos, neighbour.pos) <= self.RADIUS]
 
     def move(self):
         self.space.move_agent(self, self.decision.pos)
@@ -137,8 +144,8 @@ class SheepAgent(Agent):
 
     def hunger(self, neighbours):
         food = filter_by_type(neighbours, Grass)
-        closest = closes_neighbour(self, food)
-        return Decision(self.space.get_heading(self.pos, closest.pos))
+        closest = closest_neighbour(self, food)
+        return Decision(self.space.get_heading(self.pos, closest))
 
     def coupling(self, neighbours):
         sheep = filter_by_type(neighbours, SheepAgent)
@@ -185,8 +192,8 @@ class WolfAgent(Agent):
 
     def hunger(self, neighbours):
         food = filter_by_type(neighbours, SheepAgent)
-        closest = closes_neighbour(self, food)
-        return Decision(self.space.get_heading(self.pos, closest.pos), cost=1 + self.hunger_speed * 2 / 1000)
+        closest = closest_neighbour(self, food)
+        return Decision(self.space.get_heading(self.pos, closest), cost=1 + self.hunger_speed * 2 / 1000)
 
     def coupling(self, neighbours):
         wolves = filter_by_type(neighbours, WolfAgent)
