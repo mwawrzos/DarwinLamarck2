@@ -12,11 +12,10 @@ def filter_by_type(population, agentType):
     return (agent for agent in population if type(agent) is agentType)
 
 def closest_neighbour(agent, population):
-    def distance_from_agent(neighbour_pos):
-        return agent.space.get_distance(agent.pos, neighbour_pos)
-    return min((neighbour.pos for neighbour in population),
-               key=distance_from_agent,
-               default=agent.pos+[agent.VIEW_RANGE,0])  
+    try:
+        return next(iter(population)).pos
+    except StopIteration:
+        return agent.pos + [agent.VIEW_RANGE, 0]
 
 def avoidance_score(agent, neighbours):
     closest = closest_neighbour(agent, neighbours)
