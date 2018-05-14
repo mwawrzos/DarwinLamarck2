@@ -1,12 +1,12 @@
 import mesa
 import mesa.time
 import mesa.model
-import space
+from simulation import space
 import numpy as np
 import itertools
 import sys
 
-from boids import SheepAgent, WolfAgent, Grass
+from simulation.boids import SheepAgent, WolfAgent, Grass
 
 
 def create_sheep(sheep, space):

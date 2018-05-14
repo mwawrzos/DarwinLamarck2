@@ -1,9 +1,9 @@
 from unittest import TestCase, mock
 
-import gen_logging as log
-import toolboxes as tbx
+import gen.logging as log
+import gen.toolboxes as tbx
 
-class GenLogging(TestCase):
+class TestLogging(TestCase):
     def setUp(self):
         self.stats = log.Stats()
         self.foo_mock = mock.MagicMock()

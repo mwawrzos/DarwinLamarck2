@@ -1,7 +1,7 @@
 from unittest import TestCase, mock
 import numpy as np
 
-import space
+from simulation import space
 
 class CachedSpaceTest(TestCase):
     R = 1e-3
@@ -68,7 +68,7 @@ class CachedSpaceTest(TestCase):
 
     def test_torus_adj(self):
         pos = np.random.rand(2)
-        shifts = space.create_shifts(pos)
+        shifts = space.SHIFTS + pos
         for shift in shifts:
             np.testing.assert_array_almost_equal(
                 pos,

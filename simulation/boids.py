@@ -1,5 +1,4 @@
 import numpy as np
-import mesa.space
 import random
 
 
@@ -75,7 +74,7 @@ class Agent:
     MAX_ENERGY = 200
     RADIUS = None
 
-    def __init__(self, space : mesa.space.ContinuousSpace):
+    def __init__(self, space):
         self.space = space
         self.energy = self.MAX_ENERGY
         self.pos = None

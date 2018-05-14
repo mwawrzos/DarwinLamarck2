@@ -1,9 +1,9 @@
-from environment import Environment
-from gen_logging import Stats
+from simulation.environment import Environment
+from gen.logging import Stats
 
 class Experiment:
     def __init__(self, toolbox, epochs=50, checkpoint=None):
-        self.environment = Environment(steps=10)
+        self.environment = Environment()
         self.setup_toolbox(toolbox)
         self.epochs = epochs
 

@@ -1,14 +1,14 @@
-from mesa.space import ContinuousSpace
-
 import numpy as np
 import scipy.spatial.distance
+
+from mesa import space
 
 
 SHIFTS = np.array([np.array([x, y])
                    for x in [0, 1]
                    for y in [0, 1]])
 
-class CachedSpace(ContinuousSpace):
+class CachedSpace(space.ContinuousSpace):
     def __init__(self):
         self.agents              = []
         self.not_removed         = []
@@ -42,10 +42,11 @@ class CachedSpace(ContinuousSpace):
         return headings[lengths == lengths.min()][0]
 
     def get_distance(self, pos_1, pos_2):
+        # combinations for cartesian product
+        lcomb, rcomb = np.meshgrid(range(len(SHIFTS)), range(len(SHIFTS)))
+        
         sp1, sp2 = pos_1 + SHIFTS, pos_2 + SHIFTS
-        combinations = np.array([np.meshgrid(sp1[:,0], sp2[:,0]),
-                                 np.meshgrid(sp1[:,1], sp2[:,1])]).reshape(16, 2, 2)
-        headings = combinations[:, 0] - combinations[:, 1]
+        headings = (sp1[lcomb] - sp2[rcomb]).reshape(16,2)
         lengths  = np.linalg.norm(headings, axis=1)
         return lengths[lengths == lengths.min()][0]
 

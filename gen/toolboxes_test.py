@@ -1,5 +1,5 @@
 from unittest import TestCase, mock
-import toolboxes
+from gen import toolboxes
 
 LOWER_BND = 1
 UPPER_BND = 1000

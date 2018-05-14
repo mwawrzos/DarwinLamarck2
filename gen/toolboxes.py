@@ -1,7 +1,7 @@
 import random
 from deap import base, tools, creator, algorithms
 
-from environment import Environment
+from simulation.environment import Environment
 
 creator.create('FitnessMax', base.Fitness, weights=(1.,.1))
 creator.create('Sheep', list, fitness=creator.FitnessMax)

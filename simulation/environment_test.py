@@ -1,8 +1,8 @@
 from unittest import TestCase, mock
 
-import environment as env
+import simulation.environment as env
 
-import toolboxes as tbx
+import gen.toolboxes as tbx
 
 def contains_fitness(population):
     return [hasattr(agent, 'fitness') for agent in population]
