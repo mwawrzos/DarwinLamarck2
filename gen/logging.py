@@ -1,5 +1,6 @@
 from deap import tools
 import numpy as np
+import sys
 
 def stats(specie_idx):
     def wrapper(pop):
@@ -25,12 +26,13 @@ class Stats:
         self.stats.register('median', np.median)
         self.stats.register('max',    np.max)
         self.stats.register('alive',  alive)
+        self.stats.register('std',    np.std)
 
         self.logbook = tools.Logbook()
         self.logbook.header = 'gen', 'sheep', 'wolves'
         self.logbook.chapters['sheep'].header = 'std', 'min', 'median', 'avg', 'max', 'alive'
         self.logbook.chapters['wolves'].header = 'std', 'min', 'median', 'avg', 'max', 'alive'
-        self.logbook.columns_len = [4, 28, 28]
+        self.logbook.columns_len = [4, 33, 33]
 
         self.iteration = 0
 
@@ -40,7 +42,7 @@ class Stats:
 
             self.logbook.record(gen=self.iteration, **self.stats.compile([population]))
             self.iteration += 1
-            print(self.logbook.stream)
+            sys.stdout.write("\r%s\n" % self.logbook.stream,)
 
             return population,
 
