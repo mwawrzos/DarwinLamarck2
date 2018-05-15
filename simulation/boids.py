@@ -1,6 +1,15 @@
 import numpy as np
 import random
 
+MAX_ENERGY   = 200
+VIEW_RANGE   = 1e-1
+BASE_SPEED   = 3e-4
+SHEEP_RADIUS = 1e-3
+GRASS_RADIUS = 6e-4
+WOLF_RADIUS  = 1.4e-2
+SHEEP_EAT_ENERGY = 10
+WOLF_EAT_ENERGY  = 400
+INERTIA = 0.3
 
 def limit(val, low=0, high=1000):
     return max(low, min(high, val))
@@ -54,7 +63,7 @@ def couple(agent, population):
     return cohersion + separation + alignment
 
 class Grass:
-    RADIUS = 6e-4
+    RADIUS = GRASS_RADIUS
     energy = 0
 
     def step(self):
@@ -64,25 +73,37 @@ class Grass:
         pass
 
 class Decision:
-    def __init__(self, pos, cost=1):
-        self.pos  = pos
-        self.cost = cost
+    def __init__(self, pos, extra_speed=0):
+        self._pos  = pos
+        self.cost = 1 + 2 * extra_speed
+        self.speed = BASE_SPEED * (1 + extra_speed)
+        
+    def apply(self, agent):
+        self._pos = agent.space.torus_adj(self._pos)
+        heading = agent.space.get_heading(agent.pos, self._pos)
+        
+        agent.heading = agent.heading + INERTIA * heading
+        agent.heading /= np.linalg.norm(agent.heading)
+        agent.new_pos = agent.pos + agent.heading * self.speed
 
 class Agent:
-    VIEW_RANGE = 0.1
-    MAX_ENERGY = 200
+    VIEW_RANGE = VIEW_RANGE
+    MAX_ENERGY = MAX_ENERGY
     RADIUS = None
 
     def __init__(self, space):
         self.space = space
         self.energy = self.MAX_ENERGY
         self.pos = None
+        self.heading = np.zeros(2)
+        self.new_pos = np.zeros(2)
         
     def step(self):
         neighbours = list(self.space.get_neighbors(self, self.VIEW_RANGE, include_center=False))
         self.decision = self.make_deicision(neighbours)
     
     def advance(self):
+        self.decision.apply(self)
         coliding = self._get_coliding()
 
         if self.valid_decision(coliding):
@@ -95,14 +116,16 @@ class Agent:
             self.space._remove_agent(self.pos, self)
 
     def _get_coliding(self):
-        movement = self.space.get_distance(self.decision.pos, self.pos)
+        movement = self.space.get_distance(self.new_pos, self.pos)
         neighbours = self.space.get_neighbors(self, self.RADIUS + movement, include_center=False)
+        # neighbours = list(neighbours)
+        # print(len(neighbours), movement, self.heading)
         return [neighbour 
                 for neighbour in neighbours
-                if self.space.get_distance(self.decision.pos, neighbour.pos) <= self.RADIUS]
+                if self.space.get_distance(self.new_pos, neighbour.pos) <= self.RADIUS]
 
     def move(self):
-        self.space.move_agent(self, self.decision.pos)
+        self.space.move_agent(self, self.new_pos)
     
     def valid_decision(self, coliding):
         return not filter_by_type(coliding, type(self))
@@ -110,7 +133,6 @@ class Agent:
     def make_deicision(self, neighbours):
         decisions, weights = self.get_weighted_decisions(neighbours)
         decision = random.choices(decisions, np.array(weights).round(8) + 1e-8)[0](neighbours)
-        decision.pos = self.space.torus_adj(decision.pos)
         return decision
     
     def find_food(self, coliding):
@@ -123,7 +145,7 @@ class Agent:
         pass
 
 class SheepAgent(Agent):
-    RADIUS = 1e-3
+    RADIUS = SHEEP_RADIUS
 
     def __init__(self, genes, space):
         super(SheepAgent, self).__init__(space)
@@ -150,7 +172,7 @@ class SheepAgent(Agent):
         return Decision(couple(self, sheep))
 
     def fear(self, neighbours):
-        return Decision(escape(self, neighbours), 1 + self.fear_speed * 2 / 1000)
+        return Decision(escape(self, neighbours), self.fear_speed)
 
     def score_hunger(self):
         return score_agent_hunger(self)
@@ -169,11 +191,11 @@ class SheepAgent(Agent):
 
     def find_food(self, coliding):
         if filter_by_type(coliding, Grass):
-            self.energy += 10
+            self.energy += SHEEP_EAT_ENERGY
             self.eaten  += 1
 
 class WolfAgent(Agent):
-    RADIUS = 1.4e-2
+    RADIUS = WOLF_RADIUS
 
     def __init__(self, genes, space):
         super(WolfAgent, self).__init__(space)
@@ -191,7 +213,7 @@ class WolfAgent(Agent):
     def hunger(self, neighbours):
         food = filter_by_type(neighbours, SheepAgent)
         closest = closest_neighbour(self, food)
-        return Decision(self.space.get_heading(self.pos, closest), cost=1 + self.hunger_speed * 2 / 1000)
+        return Decision(self.space.get_heading(self.pos, closest), self.hunger_speed)
 
     def coupling(self, neighbours):
         wolves = filter_by_type(neighbours, WolfAgent)
@@ -210,6 +232,6 @@ class WolfAgent(Agent):
 
     def find_food(self, coliding):
         for sheep in filter_by_type(coliding, SheepAgent):
-            self.energy, sheep.energy = self.energy + 400, 0
+            self.energy, sheep.energy = self.energy + WOLF_EAT_ENERGY, 0
             self.eaten  += 1
             self.space._remove_agent(sheep.pos, sheep)
