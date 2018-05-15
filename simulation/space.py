@@ -47,7 +47,7 @@ class CachedSpace(space.ContinuousSpace):
         sp1, sp2 = pos_1 + SHIFTS, pos_2 + SHIFTS
         headings = (sp1[self.lcomb] - sp2[self.rcomb]).reshape(16,2)
         lengths  = np.linalg.norm(headings, axis=1)
-        return lengths[lengths == lengths.min()][0]
+        return lengths.min()
 
     def _remove_agent(self, pos, agent):
         self.not_removed[agent._idx] = False

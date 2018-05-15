@@ -66,7 +66,8 @@ class Model(mesa.model.Model):
         self.population = list(population)
         for agent in self.population:
             self.space.place_agent(agent, pos=np.random.rand(2))
-            self.schedule.add(agent)
+            if agent.energy > 0:
+                self.schedule.add(agent)
 
     def step(self):
         self.schedule.step()
