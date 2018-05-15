@@ -109,7 +109,7 @@ class Agent:
 
     def make_deicision(self, neighbours):
         decisions, weights = self.get_weighted_decisions(neighbours)
-        decision = random.choices(decisions, weights)[0](neighbours)
+        decision = random.choices(decisions, np.array(weights).round(8) + 1e-8)[0](neighbours)
         decision.pos = self.space.torus_adj(decision.pos)
         return decision
     
