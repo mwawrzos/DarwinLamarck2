@@ -1,14 +1,16 @@
 from simulation.environment import Environment
 from gen.logging import Stats
+from gen.checkpoints import CheckpointManager
 
 class Experiment:
     def __init__(self, toolbox, epochs=50, checkpoint=None):
         self.environment = Environment()
+        self.checkpoints = CheckpointManager(checkpoint)
         self.setup_toolbox(toolbox)
         self.epochs = epochs
 
-        if checkpoint:
-            self.load_state(checkpoint)
+        if self.checkpoints.last_epoch >= 0:
+            self.load_state()
         else:
             self.init_state()
 
@@ -16,7 +18,7 @@ class Experiment:
         self.toolbox = toolbox
         self.stats = Stats()
         self.toolbox.register('run_simulation', self.environment.run_simulation)
-        self.toolbox.decorate('run_simulation', self.stats.log_decorator)
+        self.toolbox.decorate('run_simulation', self.stats.log_decorator, self.checkpoints.save_decorator)
 
     def init_state(self):
         self.iteration = 0
@@ -24,8 +26,11 @@ class Experiment:
         population, = self.toolbox.population()
         self.population, = self.toolbox.run_simulation(population, self.random_seed())
 
-    def load_state(self, checkpoint):
-        pass
+    def load_state(self):
+        self.iteration   = self.checkpoints.last_epoch
+        population, seed = self.checkpoints.load_epoch(self.iteration)
+
+        self.population, = self.toolbox.run_simulation(population, seed)
 
     def run(self):
         while not self.finished():
