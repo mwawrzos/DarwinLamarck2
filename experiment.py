@@ -1,6 +1,21 @@
+import os
+
 from simulation.environment import Environment
 from gen.logging import Stats
 from gen.checkpoints import CheckpointManager
+
+
+def summary_decorator(checkpoint, logger):
+    def summary(foo):
+        def wrapper(*args, **kwargs):
+            ret = foo(*args, **kwargs)
+            with open(os.path.join(checkpoint.checkpoint_dir, 'summary.txt'), 'w') as f:
+                f.write(str(logger))
+
+            return ret
+
+        return wrapper
+    return summary
 
 class Experiment:
     def __init__(self, toolbox, epochs=50, checkpoint=None):
@@ -18,7 +33,9 @@ class Experiment:
         self.toolbox = toolbox
         self.stats = Stats()
         self.toolbox.register('run_simulation', self.environment.run_simulation)
-        self.toolbox.decorate('run_simulation', self.stats.log_decorator, self.checkpoints.save_decorator)
+        self.toolbox.decorate('run_simulation', self.stats.log_decorator,
+                                                self.checkpoints.save_decorator,
+                                                summary_decorator(self.checkpoints, self.stats.logbook))
 
     def init_state(self):
         self.iteration = 0
