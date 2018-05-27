@@ -18,7 +18,7 @@ def create_wolves(wolves, space):
 def create_grass(count):
     return (Grass() for _ in range(count))
 
-def create_populaiton(sheep, wolves, space):
+def create_population(sheep, wolves, space):
     return itertools.chain(create_sheep(sheep, space),
                            create_wolves(wolves, space),
                            create_grass(count=200))
@@ -49,7 +49,7 @@ class Environment:
 
     def prepare_model(self, species, seed):
         model = Model(seed, self.steps)
-        population = create_populaiton(*species, model.space)
+        population = create_population(*species, model.space)
         model.add_population(population)
         return model
 
