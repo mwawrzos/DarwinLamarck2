@@ -4,8 +4,8 @@ import random
 MAX_ENERGY   = 200
 VIEW_RANGE   = 1e-1
 BASE_SPEED   = 3e-4
-SHEEP_RADIUS = 1e-3
-GRASS_RADIUS = 6e-4
+SHEEP_RADIUS = 1e-2
+GRASS_RADIUS = 6e-3
 WOLF_RADIUS  = 1.4e-2
 SHEEP_EAT_ENERGY = 10
 WOLF_EAT_ENERGY  = 400
@@ -64,6 +64,7 @@ def couple(agent, population):
 
 class Grass:
     RADIUS = GRASS_RADIUS
+    COLOR = 'green'
     energy = 0
 
     def step(self):
@@ -106,7 +107,9 @@ class Agent:
         self.decision.apply(self)
         coliding = self._get_coliding()
 
+        # print(1)
         if self.valid_decision(coliding):
+            # print(2, self.pos, self.new_pos)
             self.move()
         self.energy -= self.decision.cost
         if self.energy < self.MAX_ENERGY:
@@ -128,7 +131,11 @@ class Agent:
         self.space.move_agent(self, self.new_pos)
     
     def valid_decision(self, coliding):
-        return not filter_by_type(coliding, type(self))
+        try:
+            next(filter_by_type(coliding, type(self)))
+            return False
+        except:
+            return True
 
     def make_deicision(self, neighbours):
         decisions, weights = self.get_weighted_decisions(neighbours)
@@ -146,6 +153,7 @@ class Agent:
 
 class SheepAgent(Agent):
     RADIUS = SHEEP_RADIUS
+    COLOR = 'blue'
 
     def __init__(self, genes, space):
         super(SheepAgent, self).__init__(space)
@@ -196,6 +204,7 @@ class SheepAgent(Agent):
 
 class WolfAgent(Agent):
     RADIUS = WOLF_RADIUS
+    COLOR = 'red'
 
     def __init__(self, genes, space):
         super(WolfAgent, self).__init__(space)
