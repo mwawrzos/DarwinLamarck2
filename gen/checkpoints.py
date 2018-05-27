@@ -15,10 +15,13 @@ class CheckpointManager:
         self.last_epoch = int(os.path.basename(max(glob.glob(os.path.join(checkpoint_dir, '*.pkl')),
                                                    default='-1.pkl'))[:-4])
 
+    def checkpoint_path(self, epoch):
+        return os.path.join(self.checkpoint_dir, '%d.pkl' % epoch)
+
     def save(self, population, seed):
         self.last_epoch += 1
 
-        with open(os.path.join(self.checkpoint_dir, '%d.pkl' % self.last_epoch), 'wb') as f:
+        with open(self.checkpoint_path(self.last_epoch), 'wb') as f:
             pickle.dump([population, seed], f)
 
     def save_decorator(self, foo):
@@ -30,5 +33,5 @@ class CheckpointManager:
         return wrapper
 
     def load_epoch(self, epoch):
-        with open(os.path.join(self.checkpoint_dir, '%d.pkl' % epoch), 'rb') as f:
+        with open(self.checkpoint_path(epoch), 'rb') as f:
             return pickle.load(f)
