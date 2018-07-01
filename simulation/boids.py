@@ -22,14 +22,14 @@ def score_agent_hunger(agent):
 def filter_by_type(population, agentType):
     return (agent for agent in population if type(agent) is agentType)
 
-def closest_neighbour(agent, population):
+def first_pos(agent, population):
     try:
         return next(iter(population)).pos
     except StopIteration:
         return agent.pos + [agent.VIEW_RANGE, 0]
 
 def avoidance_score(agent, neighbours):
-    closest = closest_neighbour(agent, neighbours)
+    closest = first_pos(agent, neighbours)
     distance_to_closest = agent.space.get_distance(agent.pos, closest)
     return 1 - (distance_to_closest / agent.VIEW_RANGE)
 
@@ -172,7 +172,7 @@ class SheepAgent(Agent):
 
     def hunger(self, neighbours):
         food = filter_by_type(neighbours, Grass)
-        closest = closest_neighbour(self, food)
+        closest = first_pos(self, food)
         return Decision(self.space.get_heading(self.pos, closest))
 
     def coupling(self, neighbours):
@@ -221,7 +221,7 @@ class WolfAgent(Agent):
 
     def hunger(self, neighbours):
         food = filter_by_type(neighbours, SheepAgent)
-        closest = closest_neighbour(self, food)
+        closest = first_pos(self, food)
         return Decision(self.space.get_heading(self.pos, closest), self.hunger_speed)
 
     def coupling(self, neighbours):
