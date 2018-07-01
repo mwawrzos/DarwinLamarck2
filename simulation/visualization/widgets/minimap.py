@@ -25,7 +25,7 @@ class VerySimpleCanvas(VisualizationElement):
             if isinstance(obj, Agent):
                 vx, vy = obj.pos + obj.heading / 20
                 vx, vy = vx, vy
-                v2x, v2y = np.array(obj.decision._pos) * 3e-3 + obj.pos
+                v2x, v2y = obj.pos
                 v2x, v2y = v2x, v2y
             else:
                 vx, vy = x, y
@@ -42,29 +42,5 @@ class VerySimpleCanvas(VisualizationElement):
             }
             if hasattr(obj, 'VIEW_RANGE'):
                 portrayal['rs'] = obj.VIEW_RANGE
-            if i == 1:
-                # print('DEBUG', getattr(obj, 'debug', ''))
-                # print('<<', obj.decision._pos, '>>', obj.pos, id(obj))
-                # print('[[ x y    ', x, y)
-                # print('[[ vx vy  ', vx, vy)
-                # print('[[ v2x v2y', v2x, v2y, ']]')
-                # print(i, portrayal, obj.decision.name)
-                # print(obj.decision.angles)
-                # print(obj.decision.sheep_asd)
-                portrayal['Color'] = 'magenta'
-                for influencer in obj.decision.influencers:
-                    x, y = influencer
-                    x, y = x, y
-                    space_state.append({
-                            'Color': 'black',
-                            'x': x,
-                            'y': y,
-                            'vx': x,
-                            'vy': y,
-                            'v2x': x,
-                            'v2y': y,
-                            'r': obj.RADIUS * 2
-                        })
             space_state.append(portrayal)
-        # print('='*30, model.schedule.time, '='*30)
         return space_state

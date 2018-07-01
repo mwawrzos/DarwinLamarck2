@@ -98,15 +98,10 @@ class Grass:
         pass
 
 class Decision:
-    def __init__(self, name, influencers, heading, extra_speed=0):
-        self.name = name
-        self.influencers = influencers
+    def __init__(self, heading, extra_speed=0):
         self._heading  = heading
-        self._pos = (0, 0)
         self.cost = 1 + 2 * extra_speed
         self.speed = BASE_SPEED * (1 + extra_speed)
-        self.angles = 'none'
-        self.sheep_asd = 'none'
         
     def apply(self, agent):
         agent.heading = agent.heading + INERTIA * (self._heading / (np.linalg.norm(self._heading) + EPSILON))
@@ -125,7 +120,7 @@ class Agent:
         self.old_pos = None
         self.heading = np.zeros(2)
         self.new_pos = np.zeros(2)
-        self.decision = Decision('none', [], (-1,-1))
+        self.decision = Decision((-1,-1))
         
     def make_decision(self):
         neighbours = list(self.space.get_neighbors(self, self.VIEW_RANGE, include_center=False))
@@ -201,8 +196,7 @@ class SheepAgent(Agent):
 
     def hunger(self, neighbours):
         food = filter_by_type(neighbours, Grass)
-        closest = first_pos(self, neighbours)
-        return Decision('hunger', [closest], hunt(self, food))
+        return Decision(hunt(self, food))
 
     def coupling(self, neighbours):
         sheep = list(filter_by_type(neighbours, SheepAgent))
@@ -213,14 +207,12 @@ class SheepAgent(Agent):
         population = list(p for p in sheep if angle(self.space.get_heading(self.pos, p.pos), self.heading) < np.pi/2)
         sheep = population
 
-        dec =  Decision('coupling', [s.pos for s in sheep], couple(self, sheep))
-        dec.angles = [angle(self.space.get_heading(self.pos, p.pos), self.heading) for p in s1]
-        dec.sheep_asd = s1, self.heading, '\n', [self.space.get_heading(self.pos, p.pos) for p in s1]
+        dec =  Decision(couple(self, sheep))
         return dec
 
     def fear(self, neighbours):
         wolves = list(filter_by_type(neighbours, WolfAgent))
-        return Decision('fear', [w.pos for w in wolves], escape(self, wolves), self.fear_speed)
+        return Decision(escape(self, wolves), self.fear_speed)
 
     def score_hunger(self):
         return score_agent_hunger(self)
@@ -261,12 +253,11 @@ class WolfAgent(Agent):
 
     def hunger(self, neighbours):
         food = filter_by_type(neighbours, SheepAgent)
-        closest = first_pos(self, neighbours)
-        return Decision('hunger', [closest], hunt(self, food), self.hunger_speed)
+        return Decision(hunt(self, food), self.hunger_speed)
 
     def coupling(self, neighbours):
         wolves = list(filter_by_type(neighbours, WolfAgent))
-        return Decision('couple', [w.pos for w in wolves], couple(self, wolves))
+        return Decision(couple(self, wolves))
 
     def score_hunger(self):
         return score_agent_hunger(self)
