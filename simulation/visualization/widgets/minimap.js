@@ -8,7 +8,7 @@ var AgentVisualization = function (width, height, context) {
         for (var i = 0; i < objects.length; i++) {
             var p = objects[i];
             this.drawCircle(p.x, p.y, p.r, p.Color, true);   // agent
-            this.drawCircle(p.x, p.y, p.rs, 'green', false); // sight
+            // this.drawCircle(p.x, p.y, p.rs, 'green', false); // sight
             this.drawVector(p.x, p.y, p.vx, p.vy, p.v2x, p.v2y);           // vector
         }
     };
@@ -44,6 +44,7 @@ var AgentVisualization = function (width, height, context) {
         context.lineTo(cvx, cvy);
         context.stroke();
 
+        context.strokeStyle = '#880000FF'
         context.beginPath();
         context.moveTo(cx, cy);
         context.lineTo(cv2x, cv2y);

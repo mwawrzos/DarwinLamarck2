@@ -59,7 +59,8 @@ class Model(mesa.model.Model):
         self.iter = 0
         self.steps = steps
 
-        self.schedule = mesa.time.SimultaneousActivation(self)
+        action_list = ['make_decision', 'move', 'update_space', 'resolve_collision', 'take_action']
+        self.schedule = mesa.time.StagedActivation(self, action_list)
         self.space = space.CachedSpace()
 
     def add_population(self, population):
@@ -72,7 +73,7 @@ class Model(mesa.model.Model):
     def step(self):
         self.schedule.step()
         self.clean_up()
-        self.update_results()
+        self.update_state()
     
     def clean_up(self):
         agents_to_remove = [agent
@@ -81,7 +82,7 @@ class Model(mesa.model.Model):
         for agent in agents_to_remove:
             self.schedule.remove(agent)
 
-    def update_results(self):
+    def update_state(self):
         self.iter += 1
         sys.stdout.write("\r%d" % self.iter,)
         sys.stdout.flush()

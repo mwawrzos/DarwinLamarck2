@@ -3,7 +3,7 @@
  * Created by marek on 28.04.2017.
  */
 
-var HistogramModule = function(bins, canvas_width, canvas_height) {
+var Histogram = function(bins, canvas_width, canvas_height) {
     // Create the elements
 
     // Create the tag:
@@ -41,12 +41,15 @@ var HistogramModule = function(bins, canvas_width, canvas_height) {
     };
 
     // Create the chart object
-    var chart = new Chart(context).Bar(data, options);
+    var chart = Chart.Bar(context, {
+        data: data,
+        options: options
+    })
 
     //noinspection JSUnusedGlobalSymbols
     this.render = function (data) {
         for (var i in data) { //noinspection JSUnfilteredForInLoop
-            chart.datasets[0].bars[i].value = data[i];
+            chart.config.data.datasets[0].data[i].value = data[i];
         }
         chart.update();
     };
@@ -54,6 +57,9 @@ var HistogramModule = function(bins, canvas_width, canvas_height) {
     //noinspection JSUnusedGlobalSymbols
     this.reset = function() {
         chart.destroy();
-        chart = new Chart(context).Bar(data, options);
+        chart = Chart.Bar(context, {
+            data: data,
+            options: options
+        })
     };
 };
