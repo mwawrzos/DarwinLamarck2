@@ -37,24 +37,17 @@ def avoid(neighbour_heading, radius):
     length = np.linalg.norm(neighbour_heading)
     return -neighbour_heading * (radius - length) / (length + EPSILON)
 
-def escape(agent, neighbours, avoid_range=None):
-    # if not avoid_range:
-    avoid_range = agent.VIEW_RANGE
+def escape(agent, neighbours):
     res = sum((avoid(agent.space.get_heading(agent.pos, neighbour.pos),
-                      avoid_range)
+                      agent.VIEW_RANGE)
                 for neighbour in neighbours),
                np.array([0, 0]))
-    # agent._coherepos = res * 30
-    # print(agent._coherepos)
     return res
 
 def cohere(agent, neighbours):
-    v = sum(agent.space.get_heading(agent.pos, neighbour.pos)
-            for neighbour in neighbours)    
-    res = v / (np.linalg.norm(v) + EPSILON)
-    # agent._coherepos = res * 30
-    # print(res)
-    return res
+    v = sum((agent.space.get_heading(agent.pos, neighbour.pos)
+            for neighbour in neighbours))
+    return v / (np.linalg.norm(v) + EPSILON)
 
 def align(agent, neighbours):
     mass_centre = np.mean(np.array([neighbour.heading
@@ -65,7 +58,6 @@ def align(agent, neighbours):
 def angle(V1, V2):
     cosang = np.dot(V1, V2)
     sinang = np.linalg.norm(np.cross(V1, V2))
-    # print(V1, V2, cosang, sinang)
     return np.arctan2(sinang, cosang)
 
 def couple(agent, population):
@@ -76,13 +68,7 @@ def couple(agent, population):
     alignment  = align(agent, population)
     separation = escape(agent, (neighbour
                                 for neighbour in population
-                                if agent.space.get_distance(agent.pos, neighbour.pos) <= agent.VIEW_RANGE / 2),
-                        agent.VIEW_RANGE / 2)
-    # agent.debug = '%s\n' % str(('CSA', cohersion, separation, alignment))
-    # agent.debug += '%s\n' % str(('sCSA', cohersion, separation / agent.VIEW_RANGE, alignment))
-    # agent.debug += '%s\n' % str(('lCSA', np.linalg.norm(cohersion), np.linalg.norm(separation / agent.VIEW_RANGE), np.linalg.norm(alignment)))
-    # agent.debug += 'POS %s\n' % str([n.pos for n in population])
-    # agent.debug += 'DST %s\n' % str([agent.space.get_distance(agent.pos, n.pos) for n in population])
+                                if agent.space.get_distance(agent.pos, neighbour.pos) <= agent.VIEW_RANGE / 2))
     coupling = cohersion + separation * 5 / agent.VIEW_RANGE + alignment
     return coupling / (np.linalg.norm(coupling) + EPSILON)
 
@@ -123,9 +109,6 @@ class Decision:
         self.sheep_asd = 'none'
         
     def apply(self, agent):
-        # self._pos = agent.pos + self._heading * 30
-        # self._pos = getattr(agent, '_coherepos', np.array([0,0]))
-        
         agent.heading = agent.heading + INERTIA * (self._heading / (np.linalg.norm(self._heading) + EPSILON))
         agent.heading /= (np.linalg.norm(agent.heading) + EPSILON)
         agent.new_pos = agent.space.torus_adj(agent.pos + agent.heading * self.speed)
