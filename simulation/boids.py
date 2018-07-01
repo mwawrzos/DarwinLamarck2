@@ -1,6 +1,8 @@
 import numpy as np
 import random
 
+EPSILON = 1e-16
+
 MAX_ENERGY   = 200
 VIEW_RANGE   = 1e-1
 BASE_SPEED   = 3e-4
@@ -33,7 +35,7 @@ def avoidance_score(agent, neighbours):
 
 def avoid(neighbour_heading, radius):
     length = np.linalg.norm(neighbour_heading)
-    return neighbour_heading * (radius - length) / length
+    return neighbour_heading * (radius - length) / (length + EPSILON)
 
 def escape(agent, neighbours):
     return sum((avoid(agent.space.get_heading(agent.pos, neighbour.pos),
@@ -44,7 +46,7 @@ def escape(agent, neighbours):
 def cohere(agent, neighbours):
     v = sum((agent.space.get_heading(agent.pos, neighbour.pos)
              for neighbour in neighbours))
-    return v / np.linalg.norm(v)
+    return v / (np.linalg.norm(v) + EPSILON)
 
 def align(agent, neighbours):
     return np.mean(np.array([agent.space.get_heading(agent.pos, neighbour.pos)
@@ -84,7 +86,7 @@ class Decision:
         heading = agent.space.get_heading(agent.pos, self._pos)
         
         agent.heading = agent.heading + INERTIA * heading
-        agent.heading /= np.linalg.norm(agent.heading)
+        agent.heading /= (np.linalg.norm(agent.heading) + EPSILON)
         agent.new_pos = agent.pos + agent.heading * self.speed
 
 class Agent:
@@ -137,7 +139,7 @@ class Agent:
 
     def make_deicision(self, neighbours):
         decisions, weights = self.get_weighted_decisions(neighbours)
-        decision = random.choices(decisions, np.array(weights).round(8) + 1e-8)[0](neighbours)
+        decision = random.choices(decisions, np.array(weights).round(8) + EPSILON)[0](neighbours)
         return decision
     
     def find_food(self, coliding):
