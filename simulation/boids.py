@@ -33,9 +33,9 @@ def avoidance_score(agent, neighbours):
     distance_to_closest = agent.space.get_distance(agent.pos, closest)
     return 1 - (distance_to_closest / agent.VIEW_RANGE)
 
-def avoid(avoid_vector, radius):
-    length = np.linalg.norm(avoid_vector)
-    return (avoid_vector * (radius - length) / (length + EPSILON)*-10)
+def avoid(neighbour_heading, radius):
+    length = np.linalg.norm(neighbour_heading)
+    return -neighbour_heading * (radius - length) / (length + EPSILON)
 
 def escape(agent, neighbours, avoid_range=None):
     # if not avoid_range:
@@ -83,7 +83,7 @@ def couple(agent, population):
     # agent.debug += '%s\n' % str(('lCSA', np.linalg.norm(cohersion), np.linalg.norm(separation / agent.VIEW_RANGE), np.linalg.norm(alignment)))
     # agent.debug += 'POS %s\n' % str([n.pos for n in population])
     # agent.debug += 'DST %s\n' % str([agent.space.get_distance(agent.pos, n.pos) for n in population])
-    coupling = cohersion + separation / agent.VIEW_RANGE + alignment
+    coupling = cohersion + separation * 5 / agent.VIEW_RANGE + alignment
     return coupling / (np.linalg.norm(coupling) + EPSILON)
 
 def hunt(agent, neighbours):
