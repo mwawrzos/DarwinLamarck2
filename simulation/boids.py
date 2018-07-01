@@ -46,7 +46,7 @@ def escape(agent, neighbours):
 
 def cohere(agent, neighbours):
     v = sum((agent.space.get_heading(agent.pos, neighbour.pos)
-            for neighbour in neighbours))
+             for neighbour in neighbours))
     return v / (np.linalg.norm(v) + EPSILON)
 
 def align(agent, neighbours):
