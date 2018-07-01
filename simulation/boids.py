@@ -49,8 +49,9 @@ def cohere(agent, neighbours):
     return v / (np.linalg.norm(v) + EPSILON)
 
 def align(agent, neighbours):
-    return np.mean(np.array([agent.space.get_heading(agent.pos, neighbour.pos)
-                             for neighbour in neighbours]))
+    mass_centre = np.mean(np.array([agent.space.get_heading(agent.pos, neighbour.pos)
+                                    for neighbour in neighbours]))
+    return mass_centre / (np.linalg.norm(mass_centre) + EPSILON)
 
 def couple(agent, population):
     population = list(population)
