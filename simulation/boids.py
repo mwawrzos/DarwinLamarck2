@@ -35,7 +35,7 @@ def avoidance_score(agent, neighbours):
 
 def avoid(neighbour_heading, radius):
     length = np.linalg.norm(neighbour_heading)
-    return neighbour_heading * (radius - length) / (length + EPSILON)
+    return -neighbour_heading * (radius - length) / (length + EPSILON)
 
 def escape(agent, neighbours):
     return sum((avoid(agent.space.get_heading(agent.pos, neighbour.pos),
