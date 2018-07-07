@@ -13,6 +13,9 @@ SHEEP_EAT_ENERGY = 10
 WOLF_EAT_ENERGY  = 400
 INERTIA = 0.3
 
+def unit_vector(v):
+    return v / (np.linalg.norm(v) + EPSILON)
+
 def limit(val, low=0, high=1000):
     return max(low, min(high, val))
 
@@ -45,15 +48,13 @@ def escape(agent, neighbours):
     return res
 
 def cohere(agent, neighbours):
-    v = sum((agent.space.get_heading(agent.pos, neighbour.pos)
-             for neighbour in neighbours))
-    return v / (np.linalg.norm(v) + EPSILON)
+    return unit_vector(sum((agent.space.get_heading(agent.pos, neighbour.pos)
+                           for neighbour in neighbours)))
 
 def align(agent, neighbours):
     mass_centre = np.mean(np.array([neighbour.heading
                                     for neighbour in neighbours]), axis=0)
-    res = mass_centre / (np.linalg.norm(mass_centre) + EPSILON)
-    return res
+    return unit_vector(mass_centre)
 
 def angle(V1, V2):
     cosang = np.dot(V1, V2)
@@ -70,12 +71,12 @@ def couple(agent, population):
                                 for neighbour in population
                                 if agent.space.get_distance(agent.pos, neighbour.pos) <= agent.VIEW_RANGE / 2))
     coupling = cohersion + separation * 5 / agent.VIEW_RANGE + alignment
-    return coupling / (np.linalg.norm(coupling) + EPSILON)
+    return unit_vector(coupling)
 
 def hunt(agent, neighbours):
         closest = first_pos(agent, neighbours)
         food_vector = agent.space.get_heading(agent.pos, closest)
-        return food_vector / (np.linalg.norm(food_vector) + EPSILON)
+        return unit_vector(food_vector)
 
 class Grass:
     RADIUS = GRASS_RADIUS
@@ -105,7 +106,7 @@ class Decision:
         
     def apply(self, agent):
         agent.heading = agent.heading + INERTIA * (self._heading / (np.linalg.norm(self._heading) + EPSILON))
-        agent.heading /= (np.linalg.norm(agent.heading) + EPSILON)
+        agent.heading = unit_vector(agent.heading)
         agent.new_pos = agent.space.torus_adj(agent.pos + agent.heading * self.speed)
 
 class Agent:
