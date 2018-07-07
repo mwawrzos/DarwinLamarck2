@@ -51,8 +51,8 @@ def cohere(agent, neighbours):
                            for neighbour in neighbours)))
 
 def align(agent, neighbours):
-    mass_centre = np.mean(np.array([agent.space.get_heading(agent.pos, neighbour.pos)
-                                    for neighbour in neighbours]))
+    mass_centre = np.mean(np.array([neighbour.heading
+                                    for neighbour in neighbours]), axis=0)
     return unit_vector(mass_centre)
 
 def couple(agent, population):
