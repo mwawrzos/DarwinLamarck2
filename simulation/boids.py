@@ -62,6 +62,11 @@ def angle(V1, V2):
     return np.arctan2(sinang, cosang)
 
 def couple(agent, population):
+    population = list(visible
+                      for visible in population
+                      if  angle(agent.space.get_heading(agent.pos, visible.pos),
+                                agent.heading)
+                          < np.pi/2)
     if not population:
         return np.array([0, 0])
 
@@ -200,14 +205,7 @@ class SheepAgent(Agent):
         return Decision(hunt(self, food))
 
     def coupling(self, neighbours):
-        sheep = list(filter_by_type(neighbours, SheepAgent))
-        s1 = sheep
-
-        # population = list(population)
-        # print([angle(p.pos - agent.pos, agent.heading) for p in population])
-        population = list(p for p in sheep if angle(self.space.get_heading(self.pos, p.pos), self.heading) < np.pi/2)
-        sheep = population
-
+        sheep = filter_by_type(neighbours, SheepAgent)
         dec =  Decision(couple(self, sheep))
         return dec
 
@@ -257,7 +255,7 @@ class WolfAgent(Agent):
         return Decision(hunt(self, food), self.hunger_speed)
 
     def coupling(self, neighbours):
-        wolves = list(filter_by_type(neighbours, WolfAgent))
+        wolves = filter_by_type(neighbours, WolfAgent)
         return Decision(couple(self, wolves))
 
     def score_hunger(self):
