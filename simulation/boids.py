@@ -55,8 +55,17 @@ def align(agent, neighbours):
                                     for neighbour in neighbours]), axis=0)
     return unit_vector(mass_centre)
 
+def angle(V1, V2):
+    cosang = np.dot(V1, V2)
+    sinang = np.linalg.norm(np.cross(V1, V2))
+    return np.arctan2(sinang, cosang)
+
 def couple(agent, population):
-    population = list(population)
+    population = list(visible
+                      for visible in population
+                      if  angle(agent.space.get_heading(agent.pos, visible.pos),
+                                agent.heading)
+                          < np.pi/2)
     if not population:
         return np.array([0, 0])
 
