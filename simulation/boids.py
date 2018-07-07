@@ -13,6 +13,9 @@ SHEEP_EAT_ENERGY = 10
 WOLF_EAT_ENERGY  = 400
 INERTIA = 0.3
 
+def unit_vector(v):
+    return v / (np.linalg.norm(v) + EPSILON)
+
 def limit(val, low=0, high=1000):
     return max(low, min(high, val))
 
@@ -44,14 +47,13 @@ def escape(agent, neighbours):
                np.array([0, 0]))
 
 def cohere(agent, neighbours):
-    v = sum((agent.space.get_heading(agent.pos, neighbour.pos)
-             for neighbour in neighbours))
-    return v / (np.linalg.norm(v) + EPSILON)
+    return unit_vector(sum((agent.space.get_heading(agent.pos, neighbour.pos)
+                           for neighbour in neighbours)))
 
 def align(agent, neighbours):
     mass_centre = np.mean(np.array([agent.space.get_heading(agent.pos, neighbour.pos)
                                     for neighbour in neighbours]))
-    return mass_centre / (np.linalg.norm(mass_centre) + EPSILON)
+    return unit_vector(mass_centre)
 
 def couple(agent, population):
     population = list(population)
@@ -87,7 +89,7 @@ class Decision:
         heading = agent.space.get_heading(agent.pos, self._pos)
         
         agent.heading = agent.heading + INERTIA * heading
-        agent.heading /= (np.linalg.norm(agent.heading) + EPSILON)
+        agent.heading = unit_vector(agent.heading)
         agent.new_pos = agent.pos + agent.heading * self.speed
 
 class Agent:
