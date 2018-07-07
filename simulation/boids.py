@@ -97,7 +97,7 @@ class Decision:
         self._pos = agent.space.torus_adj(self._pos)
         heading = agent.space.get_heading(agent.pos, self._pos)
         
-        agent.heading = agent.heading + INERTIA * heading
+        agent.heading = agent.heading + INERTIA * unit_vector(heading)
         agent.heading = unit_vector(agent.heading)
         agent.new_pos = agent.space.torus_adj(agent.pos + agent.heading * self.speed)
 
