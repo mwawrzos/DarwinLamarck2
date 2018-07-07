@@ -99,7 +99,7 @@ class Decision:
         
         agent.heading = agent.heading + INERTIA * heading
         agent.heading = unit_vector(agent.heading)
-        agent.new_pos = agent.pos + agent.heading * self.speed
+        agent.new_pos = agent.space.torus_adj(agent.pos + agent.heading * self.speed)
 
 class Agent:
     VIEW_RANGE = VIEW_RANGE
